@@ -1,0 +1,41 @@
+# azure-pipelines.yml
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  PYTHON_VERSION: "3.10"
+  # Azure Pipelines automatically creates an agent‐scope variable 'Build.SourceDirectory'
+  # so no need to override it here.
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "$(PYTHON_VERSION)"
+    displayName: "Use Python $(PYTHON_VERSION)"
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+      pip install pytest requests-mock
+    displayName: "Install dependencies"
+
+  - script: |
+      pytest -q
+    displayName: "Run unit tests"
+
+  # (Optional) If you want to deploy after tests pass, add more steps here.
+  # For example, to push to an Azure Web App, you could add:
+  #
+  # - task: AzureWebApp@1
+  #   inputs:
+  #     azureSubscription: '<your-service-connection-name>'
+  #     appName: '<your-azure-webapp-name>'
+  #     package: '$(Build.SourcesDirectory)'
+  #
+  # But if you simply want CI (tests), you can stop here.
